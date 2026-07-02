@@ -2,15 +2,21 @@ import java.util.regex.Pattern;
 void main() {
     var pattern = Pattern.compile("(\\d+)([+\\-*/])(\\d+)");
 
-    do{
-        String input = IO.readln();
-        var matcher = pattern.matcher(input);
-        if (matcher.matches()) {
-            Integer a = Integer.parseInt(matcher.group(1));
-            String op = matcher.group(2);
-            Integer b = Integer.parseInt(matcher.group(3));
+    while(true){
+        String input = IO.readln("> "); // looks more neatly
 
-            Integer res = switch(op){
+        if(input.trim().equalsIgnoreCase("exit")){
+            IO.println("Exiting...");
+            break;
+        }
+
+        var matcher = pattern.matcher(input.replaceAll("\\s+", "")); //clean spaces!!!
+        if (matcher.matches()) {
+            int a = Integer.parseInt(matcher.group(1));
+            String op = matcher.group(2);
+            int b = Integer.parseInt(matcher.group(3));
+
+            int res = switch(op){
                 case "+" -> a + b;
                 case "-" -> a - b;
                 case "*" -> a * b;
@@ -23,10 +29,9 @@ void main() {
                 }
                 default -> 0;
             };
-            IO.println(input + "=" + res);
+            IO.println(input.replaceAll("\\s+", "") + "=" + res);
         } else{
             IO.println("Incorrect pattern!!!");
-            break;
         }
-    } while(true);
+    }
 }
