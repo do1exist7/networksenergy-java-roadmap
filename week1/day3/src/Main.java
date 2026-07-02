@@ -1,4 +1,4 @@
-public int[] combine(int[] A, int B[]){
+public int[] combine(int[] A, int[] B){
     int i = 0, j = 0, curr = 0;
     int[] res = new int[A.length + B.length];
 
