@@ -29,7 +29,8 @@ void main() {
                 }
                 default -> 0;
             };
-            IO.println(input.replaceAll("\\s+", "") + "=" + res);
+            IO.println(input.rep
+                    laceAll("\\s+", "") + "=" + res);
         } else{
             IO.println("Incorrect pattern!!!");
         }
