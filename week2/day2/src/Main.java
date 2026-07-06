@@ -42,10 +42,32 @@ class Player implements Comparable<Player>{
 
 void main() {
     HashSet<Player> registry = new HashSet<>();
+
     registry.add(new Player("AnimeFanGirl", 500));
     registry.add(new Player("DumbPeasant", 900));
-    registry.add(new Player("ExCucumber", 900));
-    registry.add(new Player("AnimeFanGirl", 500));
+    registry.add(new Player("ExCucumber", 900)); // Ties score with DumbPeasant, but higher level!
+    registry.add(new Player("AnimeFanGirl", 500)); // Duplicate! Will be ignored.
 
-    IO.println(registry.toString());
-}
+    IO.println("Registry Size: " + registry.size());
+
+    Map<String, Player> playerDatabase = new HashMap<>();
+    for (var player : registry) {
+        playerDatabase.put(player.getUsername(), player);
+    }
+
+    if (playerDatabase.containsKey("ExCucumber")) {
+        IO.println("Found Profile: " + playerDatabase.get("ExCucumber"));
+    }
+
+    List<Player> leaderboard = new ArrayList<>(playerDatabase.values());
+
+    leaderboard.sort(Comparator.naturalOrder());
+
+
+    IO.println("\nTOURNAMENT LEADERBOARD");
+    leaderboard.forEach(IO::println);
+
+    IO.println("\n");
+    for (var entry : playerDatabase.entrySet()) {
+        IO.println("Key: " + entry.getKey() + " -> Value: " + entry.getValue());
+    }}
