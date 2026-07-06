@@ -1,6 +1,6 @@
 class Player implements Comparable<Player>{
     private String username;
-    private int score, level;
+    private int score;
     public Player(String username, int score){
         this.username = username;
         this.score = score;
