@@ -21,3 +21,8 @@ void main() {
     }
     IO.println("GEGE is the mangaka");
 }
+
+@Override
+public int hashCode() {
+    return super.hashCode();
+}
