@@ -54,12 +54,15 @@ public class TodoUI {
     }
 
     public void printMenu(){
-        IO.println("What do you want to do? Actions:\n" +
-                "1. Get list of to-do tasks\n" +
-                "2. Add to-do task\n" +
-                "3. Toggle the task\n" +
-                "4. Delete the task\n" +
-                "0. Exit\n");
+        IO.print("""
+            What do you want to do?
+            1. Get list of to-do tasks
+            2. Add to-do task
+            3. Toggle the task
+            4. Delete the task
+            0. Exit
+            
+            Enter choice:""");
     }
 
     private boolean handleList() {
@@ -99,7 +102,7 @@ public class TodoUI {
 
         IO.print("Enter the index to toggle:");
 
-        int idx = Integer.parseInt(scanner.nextLine());
+        int idx = readValidIndex();
 
         // checking the boundaries
         if (idx >= 0 && idx < tasks.size()) {
@@ -124,7 +127,7 @@ public class TodoUI {
 
         IO.print("Enter the index to delete:");
 
-        int idx = Integer.parseInt(scanner.nextLine());
+        int idx = readValidIndex();
 
         // checking the boundaries
         if (idx >= 0 && idx < tasks.size()) {
@@ -134,6 +137,14 @@ public class TodoUI {
             IO.println("Invalid index!");
         }
         return true;
+    }
+
+    private int readValidIndex() {
+        try {
+            return Integer.parseInt(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            return -1; // Return an invalid index that fails boundary checks
+        }
     }
 
 }
