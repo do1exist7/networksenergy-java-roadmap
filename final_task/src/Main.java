@@ -2,11 +2,21 @@ import java.util.Scanner;
 
 public record TodoTask(UUID id, String title, boolean isCompleted) {}
 
+/**
+ * Сервис для управления To-Do листом через CRUD операции.
+ * Использует хранилище на базе HashMap.
+ */
 public class TaskService {
-    // "Fake" Database
+    // Имитируем реальную базу данных с помощью HashMap.
+    // UUID выступает в роли первичного ключа (Primary Key).
     private final Map<UUID, TodoTask> database = new HashMap<>();
 
-    // Creation
+    /**
+     * Создает новую задачу и сохраняет ее в базу данных.
+     * * @param title Название задачи (не должно быть пустым)
+     * @return Созданный объект TodoTask с уникальным UUID
+     * @throws IllegalArgumentException если название задачи пустое или null
+     */
     public TodoTask createTask(String title) {
         if (title == null || title.isBlank()) throw new IllegalArgumentException("Title can't be empty!");
         var task = new TodoTask(UUID.randomUUID(), title, false);
@@ -14,18 +24,29 @@ public class TaskService {
         return task;
     }
 
-    // Read
+    /**
+     * Возвращает задачу по её ID.
+     * @param id уникальный идентификатор задачи
+     * @return Optional с задачей, или Optional.empty(), если задача не найдена
+     */
     public Optional<TodoTask> getTask(UUID id) { return Optional.ofNullable(database.get(id)); }
     public List<TodoTask> getAllTasks() { return new ArrayList<>(database.values()); }
 
-    // Update
+    /**
+     * Переключает статус выполнения задачи (выполнено / не выполнено).
+     * * @param id Уникальный идентификатор задачи
+     * @throws NoSuchElementException если задача с таким ID не найдена
+     */
     public void toggleTask(UUID id) {
         TodoTask task = database.get(id);
         if (task == null) throw new NoSuchElementException("Task not found!");
         database.put(id, new TodoTask(task.id(), task.title(), !task.isCompleted()));
     }
 
-    // Delete
+    /**
+     * Удаляет задачу из базы данных.
+     * @param id уникальный идентификатор задачи на удаление
+     */
     public void deleteTask(UUID id) { database.remove(id); }
 }
 
@@ -139,11 +160,14 @@ public class TodoUI {
         return true;
     }
 
+
     private int readValidIndex() {
+        // Читаем всю строку и парсим в int.
+        // Это защищает от бага Scanner.nextInt(), который оставляет символ новой строки '\n' в буфере.
         try {
             return Integer.parseInt(scanner.nextLine());
         } catch (NumberFormatException e) {
-            return -1; // Return an invalid index that fails boundary checks
+            return -1; // Return an invalid index that fails boundary checks in the handleToggle() and handleDelete()
         }
     }
 
