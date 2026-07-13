@@ -2,14 +2,46 @@ import java.util.Scanner;
 
 public record TodoTask(UUID id, String title, boolean isCompleted) {}
 
+public interface TaskRepository {
+    void save(TodoTask task);
+    Optional<TodoTask> findById(UUID id);
+    List<TodoTask> findAll();
+    void deleteById(UUID id);
+}
+
+public class InMemoryTaskRepository implements TaskRepository{
+    private final Map<UUID, TodoTask> database = new HashMap<>();
+
+    @Override
+    public void save(TodoTask task) {
+        database.put(task.id(), task);
+    }
+
+    @Override
+    public Optional<TodoTask> findById(UUID id) {
+        return Optional.ofNullable(database.get(id));
+    }
+
+    @Override
+    public List<TodoTask> findAll() {
+        return new ArrayList<>(database.values());
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        database.remove(id);
+    }
+}
+
 /**
  * Сервис для управления To-Do листом через CRUD операции.
- * Использует хранилище на базе HashMap.
  */
 public class TaskService {
-    // Имитируем реальную базу данных с помощью HashMap.
-    // UUID выступает в роли первичного ключа (Primary Key).
-    private final Map<UUID, TodoTask> database = new HashMap<>();
+    private final TaskRepository repository;
+
+    public TaskService(TaskRepository repository) {
+        this.repository = repository;
+    }
 
     /**
      * Создает новую задачу и сохраняет ее в базу данных.
@@ -20,7 +52,7 @@ public class TaskService {
     public TodoTask createTask(String title) {
         if (title == null || title.isBlank()) throw new IllegalArgumentException("Title can't be empty!");
         var task = new TodoTask(UUID.randomUUID(), title, false);
-        database.put(task.id(), task);
+        repository.save(task);
         return task;
     }
 
@@ -29,8 +61,8 @@ public class TaskService {
      * @param id уникальный идентификатор задачи
      * @return Optional с задачей, или Optional.empty(), если задача не найдена
      */
-    public Optional<TodoTask> getTask(UUID id) { return Optional.ofNullable(database.get(id)); }
-    public List<TodoTask> getAllTasks() { return new ArrayList<>(database.values()); }
+    public Optional<TodoTask> getTask(UUID id) { return repository.findById(id);}
+    public List<TodoTask> getAllTasks() { return repository.findAll();}
 
     /**
      * Переключает статус выполнения задачи (выполнено / не выполнено).
@@ -38,20 +70,21 @@ public class TaskService {
      * @throws NoSuchElementException если задача с таким ID не найдена
      */
     public void toggleTask(UUID id) {
-        TodoTask task = database.get(id);
-        if (task == null) throw new NoSuchElementException("Task not found!");
-        database.put(id, new TodoTask(task.id(), task.title(), !task.isCompleted()));
+        TodoTask updatedTask = repository.findById(id)
+                .map(task -> new TodoTask(task.id(), task.title(), !task.isCompleted()))
+                .orElseThrow(() -> new NoSuchElementException("Task not found!"));
+        repository.save(updatedTask);
     }
 
     /**
      * Удаляет задачу из базы данных.
      * @param id уникальный идентификатор задачи на удаление
      */
-    public void deleteTask(UUID id) { database.remove(id); }
+    public void deleteTask(UUID id) { repository.deleteById(id);}
 }
 
 public class TodoUI {
-    private final TaskService service = new TaskService();
+    private final TaskService service = new TaskService(new InMemoryTaskRepository());
     private final Scanner scanner = new Scanner(System.in);
 
     public void start() {
