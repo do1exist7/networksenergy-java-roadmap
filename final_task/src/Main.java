@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 public record TodoTask(UUID id, String title, boolean isCompleted) {}
 
 public class TaskService {
@@ -27,9 +29,88 @@ public class TaskService {
     public void deleteTask(UUID id) { database.remove(id); }
 }
 
+public class TodoUI {
+    private final TaskService service = new TaskService();
+    private final Scanner scanner = new Scanner(System.in);
+
+    public void start() {
+        boolean running = true;
+        while (running) {
+            printMenu();
+            String choice = scanner.nextLine();
+
+            running = switch (choice) {
+                case "1" -> handleList();
+                case "2" -> handleAdd();
+                case "3" -> handleDelete();
+                case "0" -> false; // Exit the loop
+                default -> {
+                    IO.println("Unknown command!");
+                    yield true;
+                }
+            };
+        }
+    }
+
+    public void printMenu(){
+        IO.println("What do you want to do? Actions:\n" +
+                "1. Get list of to-do tasks\n" +
+                "2. Add to-do task\n" +
+                "3. Delete the task\n" +
+                "0. Exit\n");
+    }
+
+    private boolean handleList() {
+        var tasks = service.getAllTasks();
+        if(tasks.isEmpty()) {
+            IO.println("List is empty!");
+            return true;
+        }
+        for (int i = 0; i < tasks.size(); i++) {
+            IO.println("%d. %s. Completed: [%s]".formatted(i, tasks.get(i).title(), tasks.get(i).isCompleted() ? "✓" : "✘"));
+        }
+        return true;
+    }
+
+    private boolean handleAdd() {
+        IO.print("Enter the name of new task:");
+        String title = scanner.nextLine();
+        try {
+            service.createTask(title);
+        } catch (IllegalArgumentException e){
+            IO.println(e.getMessage());
+        }
+
+        return true;
+    }
+
+    private boolean handleDelete() {
+        var tasks = service.getAllTasks();
+        if (tasks.isEmpty()) {
+            IO.println("List is empty!");
+            return true;
+        }
+
+        for (int i = 0; i < tasks.size(); i++) {
+            IO.println("%d. %s".formatted(i, tasks.get(i).title()));
+        }
+
+        IO.print("Enter the index to delete:");
+
+        int idx = Integer.parseInt(scanner.nextLine());
+
+        // checking the boundaries
+        if (idx >= 0 && idx < tasks.size()) {
+            service.deleteTask(tasks.get(idx).id());
+            IO.println("Deleted!");
+        } else {
+            IO.println("Invalid index!");
+        }
+        return true;
+    }
+
+}
+
 void main() {
-    var toDoList = new TaskService();
-    toDoList.createTask("Watch anime");
-    toDoList.createTask("Learn Java");
-    IO.println(toDoList.getAllTasks());
+    new TodoUI().start();
 }
