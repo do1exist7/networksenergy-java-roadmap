@@ -42,7 +42,8 @@ public class TodoUI {
             running = switch (choice) {
                 case "1" -> handleList();
                 case "2" -> handleAdd();
-                case "3" -> handleDelete();
+                case "3" -> handleToggle();
+                case "4" -> handleDelete();
                 case "0" -> false; // Exit the loop
                 default -> {
                     IO.println("Unknown command!");
@@ -56,7 +57,8 @@ public class TodoUI {
         IO.println("What do you want to do? Actions:\n" +
                 "1. Get list of to-do tasks\n" +
                 "2. Add to-do task\n" +
-                "3. Delete the task\n" +
+                "3. Toggle the task\n" +
+                "4. Delete the task\n" +
                 "0. Exit\n");
     }
 
@@ -81,6 +83,31 @@ public class TodoUI {
             IO.println(e.getMessage());
         }
 
+        return true;
+    }
+
+    private boolean handleToggle() {
+        var tasks = service.getAllTasks();
+        if (tasks.isEmpty()) {
+            IO.println("List is empty!");
+            return true;
+        }
+
+        for (int i = 0; i < tasks.size(); i++) {
+            IO.println("%d. %s".formatted(i, tasks.get(i).title()));
+        }
+
+        IO.print("Enter the index to toggle:");
+
+        int idx = Integer.parseInt(scanner.nextLine());
+
+        // checking the boundaries
+        if (idx >= 0 && idx < tasks.size()) {
+            service.toggleTask(tasks.get(idx).id());
+            IO.println("Toggled!");
+        } else {
+            IO.println("Invalid index!");
+        }
         return true;
     }
 
